@@ -72,8 +72,7 @@ GLHF!
 #------------------------------------------------------------#
 def set_tg_token():
     global TOKEN
-    TOKEN = env.TOKEN_sowl
-    # TOKEN = env.TOKEN_trin if USE_PROD_TG else env.TOKEN_dev
+    TOKEN = env.TOKEN_sowl if USE_PROD_TG else env.TOKEN_sowl_test
 
 def is_valid_chat_id(_chat_id, _group_name, _uname, _handle):
     print("chat_id:", _chat_id)
@@ -252,7 +251,8 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False):
             str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
             await update.message.reply_text(f"Registration successful!\nYour referral link: {new_ref_link} ...\n {str_r}")
         else:
-            await update.message.reply_text(f"'/{tg_cmd}' Executed Successfully! _ ")
+            str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
+            await update.message.reply_text(f"'/{tg_cmd}' Executed Successfully! ...\n {str_r} ")
         
     print('', f'EXIT - {funcname} _ {get_time_now()}', cStrDivider_1, sep='\n')
 
@@ -453,7 +453,7 @@ if __name__ == "__main__":
     ## exe ##
     try:
         # select to use prod bot or dev bot
-        inp = input('\nSelect TG bot to use:\n  0 = @sowl_refer_bot \n  1 = @none \n  > ')
+        inp = input('\nSelect TG bot to use:\n  0 = @sowl_refer_bot \n  1 = @sowl_test_bot \n  > ')
         USE_PROD_TG = True if inp == '0' else False
         print(f'  input = {inp} _ USE_PROD_TG = {USE_PROD_TG}')
 

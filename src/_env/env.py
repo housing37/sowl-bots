@@ -32,4 +32,6 @@ OPENAI_KEY = os.environ['OPENAI_KEY']
 
 # telegram
 TOKEN_sowl = os.environ['TG_TOKEN_SOWL'] # @sowl_refer_bot
+TOKEN_sowl_test = os.environ['TG_TOKEN_SWOWL_TEST'] # @sowl_test_bot
+
 #============================================================================#

@@ -16,25 +16,52 @@ BEGIN
     SELECT referral_points FROM user_promotors WHERE fk_user_id = @v_user_id INTO @v_pts_earned;
     SELECT tg_user_group_url FROM user_promotors WHERE fk_user_id = @v_user_id INTO @v_ref_link;
     SELECT COUNT(*) FROM user_referrals WHERE tg_user_group_url = @v_ref_link AND is_active = FALSE INTO @v_usr_lost_cnt;
-    SELECT u.id as u_id, r.*,
-            'success' as `status`,
-            'retreived promotor info' as info,
-            @v_user_id as promotor_user_id,
-            @v_pts_earned as promotor_pts_earned,
-            @v_usr_lost_cnt as promotor_pts_lost,
-            @v_ref_link as promotor_ref_link,
-            p_tg_user_id as tg_user_id_inp,
-            p_start_idx as start_idx_inp,
-            p_count as count_inp,
-            p_desc as desc_inp
-        FROM users u
-        INNER JOIN user_referrals r
-            ON u.id = r.fk_user_id
-        WHERE tg_user_group_url = @v_ref_link
-        ORDER BY 
-            r.is_active ASC,
-            u.dt_created * (CASE WHEN p_desc THEN -1 ELSE 1 END)
-        LIMIT p_start_idx, p_count;
+    IF @v_usr_lost_cnt > 0 THEN
+	    SELECT u.id as u_id, 
+	    		r.*, 
+	    		p.*,
+	            'success' as `status`,
+	            'retreived promotor info' as info,
+	            @v_user_id as promotor_user_id,
+	            @v_pts_earned as promotor_pts_earned,
+	            @v_usr_lost_cnt as promotor_pts_lost,
+	            @v_ref_link as promotor_ref_link,
+	            p_tg_user_id as tg_user_id_inp,
+	            p_start_idx as start_idx_inp,
+	            p_count as count_inp,
+	            p_desc as desc_inp
+	        FROM users u
+	        INNER JOIN user_referrals r
+	            ON u.id = r.fk_user_id
+	        INNER JOIN user_promotors p 
+	            ON u.id = p.fk_user_id
+	        -- WHERE p.tg_user_group_url = @v_ref_link
+	        WHERE u.id = @v_user_id
+	        ORDER BY 
+	            r.is_active ASC,
+	            u.dt_created * (CASE WHEN p_desc THEN -1 ELSE 1 END)
+	        LIMIT p_start_idx, p_count;
+    ELSE
+	    SELECT u.id as u_id, 
+	    		p.*,
+	            'success' as `status`,
+	            'retreived promotor info' as info,
+	            @v_user_id as promotor_user_id,
+	            @v_pts_earned as promotor_pts_earned,
+	            @v_usr_lost_cnt as promotor_pts_lost,
+	            @v_ref_link as promotor_ref_link,
+	            p_tg_user_id as tg_user_id_inp,
+	            p_start_idx as start_idx_inp,
+	            p_count as count_inp,
+	            p_desc as desc_inp
+	        FROM users u
+	        INNER JOIN user_promotors p 
+	            ON u.id = p.fk_user_id
+	        WHERE u.id = @v_user_id
+	        ORDER BY 
+	            u.dt_created * (CASE WHEN p_desc THEN -1 ELSE 1 END)
+	        LIMIT p_start_idx, p_count;
+    END IF;
 END 
 $$ DELIMITER ;
 
