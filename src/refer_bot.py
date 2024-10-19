@@ -30,7 +30,8 @@ WHITELIST_CHAT_IDS = [
     '-1002049491115', # $BearShares - testing
     # '-4139183080', # ?
     '-1001941928043', # TeddyShares - testing
-    '-1002375576767', # tg group: testing_sowl_refer
+    '-1002375576767', # tg group: test_sowl_test_bot
+    '-1002275201622', # tg group: test_sowl_refer_bot
     ]
 BLACKLIST_TEXT = [
     'smart vault', 'smart-vault', 'smart_vault', # @JstKidn
