@@ -32,6 +32,7 @@ WHITELIST_CHAT_IDS = [
     '-1001941928043', # TeddyShares - testing
     '-1002375576767', # tg group: test_sowl_test_bot
     '-1002275201622', # tg group: test_sowl_refer_bot
+    '-1002003863532', # tg group: $SOWL🦉 ZONE
     ]
 BLACKLIST_TEXT = [
     'smart vault', 'smart-vault', 'smart_vault', # @JstKidn
