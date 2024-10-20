@@ -16,25 +16,33 @@ BEGIN
     SELECT referral_points FROM user_promotors WHERE fk_user_id = @v_user_id INTO @v_pts_earned;
     SELECT tg_user_group_url FROM user_promotors WHERE fk_user_id = @v_user_id INTO @v_ref_link;
     SELECT COUNT(*) FROM user_referrals WHERE tg_user_group_url = @v_ref_link AND is_active = FALSE INTO @v_usr_lost_cnt;
-    IF @v_usr_lost_cnt > 0 THEN
+    SELECT COUNT(*) FROM user_referrals WHERE tg_user_group_url = @v_ref_link INTO @v_usr_ref_cnt;
+    IF @v_usr_ref_cnt > 0 THEN
 	    SELECT u.id as u_id, 
-	    		r.*, 
-	    		p.*,
+	    		r.dt_created as dt_created_ref, r.dt_updated as dt_updated_ref, 
+	    		r.dt_deleted as dt_deleted_ref, r.fk_user_id as fk_user_id_ref, 
+	    		r.tg_user_group_url as tg_user_group_url_ref, r.is_active as is_active_ref, 
+	    		p.dt_created as dt_created_prom, p.dt_updated as dt_updated_prom, 
+	    		p.dt_deleted as dt_deleted_prom, p.fk_user_id as fk_user_id_prom, 
+	    		p.tg_user_group_url as tg_user_group_url_prom, p.referral_points as referral_points_prom,
 	            'success' as `status`,
 	            'retreived promotor info' as info,
 	            @v_user_id as promotor_user_id,
 	            @v_pts_earned as promotor_pts_earned,
 	            @v_usr_lost_cnt as promotor_pts_lost,
+                @v_usr_ref_cnt as promotor_ref_cnt,
 	            @v_ref_link as promotor_ref_link,
 	            p_tg_user_id as tg_user_id_inp,
 	            p_start_idx as start_idx_inp,
 	            p_count as count_inp,
 	            p_desc as desc_inp
 	        FROM users u
-	        INNER JOIN user_referrals r
-	            ON u.id = r.fk_user_id
+	        -- INNER JOIN user_referrals r
+	        --     ON u.id = r.fk_user_id
 	        INNER JOIN user_promotors p 
 	            ON u.id = p.fk_user_id
+            INNER JOIN user_referrals r
+                ON r.tg_user_group_url = p.tg_user_group_url
 	        -- WHERE p.tg_user_group_url = @v_ref_link
 	        WHERE u.id = @v_user_id
 	        ORDER BY 
@@ -43,12 +51,15 @@ BEGIN
 	        LIMIT p_start_idx, p_count;
     ELSE
 	    SELECT u.id as u_id, 
-	    		p.*,
+	    		p.dt_created as dt_created_prom, p.dt_updated as dt_updated_prom, 
+	    		p.dt_deleted as dt_deleted_prom, p.fk_user_id as fk_user_id_prom, 
+	    		p.tg_user_group_url as tg_user_group_url_prom, p.referral_points as referral_points_prom,
 	            'success' as `status`,
 	            'retreived promotor info' as info,
 	            @v_user_id as promotor_user_id,
 	            @v_pts_earned as promotor_pts_earned,
 	            @v_usr_lost_cnt as promotor_pts_lost,
+                @v_usr_ref_cnt as promotor_ref_cnt,
 	            @v_ref_link as promotor_ref_link,
 	            p_tg_user_id as tg_user_id_inp,
 	            p_start_idx as start_idx_inp,
