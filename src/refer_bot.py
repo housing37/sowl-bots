@@ -8,12 +8,12 @@ print('', cStrDivider, f'GO _ {__filename} -> starting IMPORTs & declaring globa
 #   IMPORTS                                                  #
 #------------------------------------------------------------#
 # import random, 
+import pprint
 from _env import env
 import time, os, traceback, sys, json, pprint
 from datetime import datetime
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler, CallbackContext
-
+from telegram.ext import Application, CommandHandler, MessageHandler, ChatMemberHandler, filters, CallbackQueryHandler, CallbackContext
 import req_handler
 
 # Define the timestamp representing the bot's last online time
@@ -109,18 +109,6 @@ def past_queue_limit(_msg_time, _q_sec=5*60):
     if sec_diff > _q_sec: print(f"Ignoring message sent more than {_q_sec} sec ago.")
     return sec_diff > _q_sec
 
-# # Function to handle new group members
-# def member_joined(update: Update, context: CallbackContext):
-#     if update.chat_member.new_chat_member:
-#         # Check if the user joined via an invite link
-#         if update.chat_member.invite_link:
-#             invite_link = update.chat_member.invite_link.invite_link
-#             # Log or process the invite link used
-#             print(f"User {update.chat_member.new_chat_member.user.first_name} joined using invite link: {invite_link}")
-#         else:
-#             print(f"User {update.chat_member.new_chat_member.user.first_name} joined the group.")
-
-
 async def cmd_handler(update: Update, context):
     # Calculate the timestamp of 5 minutes ago
     if past_queue_limit(update.message.date.timestamp()): return
@@ -136,10 +124,10 @@ async def cmd_handler(update: Update, context):
 
     user = update.message.from_user
     uid = user.id
-    uname_at = user.username
-    uname_handle = user.first_name
+    uname_at = user.username if user.username else 'nil_at'
+    uname_handle = user.first_name if user.first_name else 'nil_disabled'
     if user.last_name:
-        uname_handle = user.first_name + ' ' + user.last_name
+        uname_handle = uname_handle + ' ' + user.last_name
     inp_split = list(update.message.text.split())
 
     # parse about @user (if user simply hit enter from cmd description list in TG chat)
@@ -190,8 +178,8 @@ async def cmd_handler(update: Update, context):
             # pass # no params for 'gen_ref_link'
 
         if tg_cmd == req_handler.kSHOW_LEADERS: # proc: GET_LEADER_BOARD
-            inp_split.insert(3, uname_handle)
-            # pass # no params for 'gen_ref_link'
+            # inp_split.insert(3, uname_handle)
+            pass # no params for 'gen_ref_link'
 
     # NOTE: all admin db procs require 'tg_admin_id' & 'tg_user_at' (ie. uid & <tg_user_at>)    
     else: # if 'admin' in tg_cmd
@@ -213,6 +201,7 @@ async def btn_option_selects(update: Update, context):
     await cmd_exe(update, context)
 
 async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False):
+    pprint.pprint(update.to_dict())  # Convert to dict for easier reading
     funcname = 'cmd_exe'
     print(cStrDivider_1, f'ENTER - {funcname} _ {get_time_now()}', sep='\n')
     
@@ -254,7 +243,11 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False):
             await update.message.reply_text(f"Registration successful!\nYour referral link: {new_ref_link} ...\n {str_r}")
         else:
             str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
-            await update.message.reply_text(f"'/{tg_cmd}' Executed Successfully! ...\n {str_r} ")
+            if update.message:
+                await update.message.reply_text(f"'/{tg_cmd}' Executed Successfully! ...\n {str_r} ")
+            elif update.chat_member:
+                await context.bot.send_message(chat_id=update.chat_member.chat.id, text=f"'/{tg_cmd}' Executed Successfully! ...\n {str_r} ")
+        print('\n request handler response successful!')
         
     print('', f'EXIT - {funcname} _ {get_time_now()}', cStrDivider_1, sep='\n')
 
@@ -270,16 +263,20 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False):
 #     else: True # db proc failes, return True (act like shill already used)
 
 async def attempt_aux_cmd_exe(update: Update, context):
+    pprint.pprint(update.to_dict())  # Convert to dict for easier reading
     funcname = 'attempt_aux_cmd_exe'
-    user = update.message.from_user
+    user = update.message.from_user if update.message else update.chat_member.from_user
     uid = user.id
-    uname_at = user.username
-    uname_handle = 'nil_disabled'
+    uname_at = user.username if user.username else 'nil_at'
+    uname_handle = user.first_name if user.first_name else 'nil_disabled'
+    if user.last_name:
+        uname_handle = uname_handle + ' ' + user.last_name
 
     # validate user has @username setup
     if uname_at == None:
-        print(f'{get_time_now()} __ action : found uname_at == None; skip attempt_aux_cmd_exe')
-        return
+        uname_at = str(uid)
+        # print(f'{get_time_now()} __ action : found uname_at == None; skip attempt_aux_cmd_exe')
+        # return
     
     if USE_ALT_ACCT: 
         # uid = '1058890141'
@@ -287,59 +284,42 @@ async def attempt_aux_cmd_exe(update: Update, context):
         uid = '6919802491'
         uname_at = 'fricardooo'
 
-    # check if message text 'could' contain a tweet url
-    inp = update.message.text
-    if 'x.com' not in inp and 'twitter.com' not in inp: return
-
-    print(f'{get_time_now()} __ action : found potential tweet url')
-    print(cStrDivider_1, f'ENTER - {funcname} _ {get_time_now()}', sep='\n')
-
-    # # traverse through string, check for valid tweet url, 
-    # #   if valid tweet, check db to see if its been used yet
-    # #   if not used yet, generate aux_inp_split & attempt /register & /submit
-    # inp_split = list(update.message.text.split())
-    # for str_ in inp_split:
-    #     keyVals, valid_tweet = valid_tweet_url(str_)
-    #     if valid_tweet:
-    #         tweet_is_used = used_bs_tweet_url(keyVals) # db check for used reg or shill
-    #         print(f'tweet_is_used: {tweet_is_used}')
-    #         if not tweet_is_used:
-    #             valid_shill, msg = req_handler.valid_trinity_tweet(str_, ['@BearSharesX']) # net request
-    #             valid_reg, msg = req_handler.valid_trinity_tweet(str_, ['@BearSharesX', 'Trinity', 'register']) # net request
-    #             print(f'valid_shill: {valid_shill}')
-    #             if valid_shill:
-    #                 aux_inp_split = ['/'+req_handler.kSUBMIT_SHILL, uid, uname_at, str_]
-    #                 context.user_data['inp_split'] = list(aux_inp_split)
-    #                 await cmd_exe(update, context, aux_cmd=True)
-                
-    #             print(f'valid_reg: {valid_reg}')
-    #             if valid_reg:
-    #                 aux_inp_split = ['/'+req_handler.kSHILLER_REG, uid, uname_at, uname_handle, '0x0', str_]
-    #                 context.user_data['inp_split'] = list(aux_inp_split)
-    #                 await cmd_exe(update, context, aux_cmd=True)
-    #             print(f'valid_shill: {valid_shill}')
-    #             print(f'valid_reg: {valid_reg}')
+    # handle new group members
+    if update.chat_member and update.chat_member.new_chat_member: # LEFT OFF HERE ... SOMWHERE 
+        print('GO - update.chat_member and update.chat_member.new_chat_member')
+        # Check if the user joined via an invite link
+        if update.chat_member.invite_link:
+            invite_link = update.chat_member.invite_link.invite_link
+            # Log or process the invite link used
+            print(f"User @{uname_at} joined using invite link: {invite_link}")
+            aux_inp_split = ['/'+req_handler.kAUX_REF_EVENT, uid, uname_at, uname_handle, 1, invite_link]
+            # aux_inp_split = ['/'+req_handler.kAUX_REF_EVENT, uid, uname_at, uname_handle, 1, invite_link['invite_link']]
+                # inp_split.insert(4, invite_link['invite_link'])
+            context.user_data['inp_split'] = list(aux_inp_split)
+            await cmd_exe(update, context, aux_cmd=True)
+        else:
+            print(f"User @{uname_at} joined the group w/o invite link")
 
     print('', f'EXIT - {funcname} _ {get_time_now()}', cStrDivider_1, sep='\n')
 
 async def log_activity(update: Update, context):
-    if update.message == None:
-        print(f'{get_time_now()} _ action : found .message == None; returning')
-        return
-
-    chat_type = str(update.message.chat.type)
-    chat_id = update.message.chat_id
-    user = update.message.from_user
-    uid = str(user.id)
-    usr_at_name = f'@{user.username}'
-    usr_handle = user.first_name
-    inp = update.message.text
-    lst_user_data = [uid, usr_at_name, usr_handle]
-    lst_chat_data = [chat_id, chat_type]
-    print(f'{get_time_now()} _ action: {lst_user_data}, {lst_chat_data}')
-    
-    # if not USE_PAYOUT_ONLY and update.message.text: await attempt_aux_cmd_exe(update, context)
-    if update.message.text: await attempt_aux_cmd_exe(update, context)
+    print('checking requirements for attempt_aux_cmd_exe')
+    if update.message != None:
+        chat_type = str(update.message.chat.type)
+        chat_id = update.message.chat_id
+        user = update.message.from_user
+        uid = str(user.id)
+        usr_at_name = f'@{user.username}' if user.username else 'nil_at'
+        usr_handle = user.first_name
+        inp = update.message.text
+        lst_user_data = [uid, usr_at_name, usr_handle]
+        lst_chat_data = [chat_id, chat_type]
+        print(f'{get_time_now()} _ action: {lst_user_data}, {lst_chat_data}')
+        await attempt_aux_cmd_exe(update, context)
+    elif update.chat_member != None:
+        await attempt_aux_cmd_exe(update, context)
+    else:
+        print(f'{get_time_now()} _ action : found .message & .chat_member == None; returning')
 
 async def test(update: Update, context):
     funcname = 'test'
@@ -373,11 +353,18 @@ def main():
     # Add message handler for ALL messages
     #   ref: https://docs.python-telegram-bot.org/en/stable/telegram.ext.filters.html#filters-module
     dp.add_handler(MessageHandler(filters.ALL, log_activity))
+
+    # Add handler for ChatMember updates
+    dp.add_handler(ChatMemberHandler(log_activity, ChatMemberHandler.CHAT_MEMBER))
+    
+
     print('added handler ALL: log_activity')
 
     # Start the Bot
     print('\nbot running ...\n')
-    dp.run_polling(drop_pending_updates=True)
+    # dp.run_polling(drop_pending_updates=True)
+    # Specify allowed updates
+    dp.run_polling(drop_pending_updates=True, allowed_updates=['message', 'chat_member', 'callback_query'])
 
 
     # allowed_updates = [

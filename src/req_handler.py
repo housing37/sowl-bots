@@ -68,7 +68,7 @@ LST_CMD_REF_EVENT = ['<is_join>', '<tg_user_group_url>']
 STR_ERR_REF_EVENT = f'''please use cmd format :\n /{kAUX_REF_EVENT} {" ".join(LST_CMD_REF_EVENT)}'''
 LST_KEYS_REF_EVENT_RESP = env.LST_KEYS_PLACEHOLDER
 DB_PROC_REF_EVENT = 'EXE_REFERRAL_EVENT'
-LST_KEYS_REF_EVENT = ['user_id','user_at','user_handle']
+LST_KEYS_REF_EVENT = ['user_id','user_at','user_handle','is_join','tg_user_group_url']
 
 #-----------------------------------------------------#
 DICT_CMD_EXE = {

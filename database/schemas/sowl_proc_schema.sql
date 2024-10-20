@@ -200,7 +200,7 @@ BEGIN
         INNER JOIN users u
             ON u.id = r.fk_user_id
         INNER JOIN user_promotors p
-            ON u.id = p.fk_user_id
+            ON p.tg_user_group_url = r.tg_user_group_url
         WHERE r.id = @v_ref_id;
 END 
 $$ DELIMITER ;
