@@ -160,15 +160,16 @@ async def cmd_handler(update: Update, context):
         print(f'No admin found in tg_cmd: {tg_cmd}')
         if tg_cmd == req_handler.kREG_USER: # proc: ADD_TG_SOWL_PROMOTOR
             print(f'Detected cmd: {req_handler.kREG_USER}')
-            # insert after /cmd ['</cmd>','user_id','user_at','user_handle','<tg_user_group_url>']
-            inp_split.insert(1, uid) 
+            # insert after /cmd ['</cmd>','user_id','user_at','user_handle','chat_id','<tg_user_group_url>']
+            inp_split.insert(1, str(uid)) 
             inp_split.insert(2, uname_at) # left off here ....
             inp_split.insert(3, uname_handle)
+            inp_split.insert(4, str(_chat_id))
 
             # generate random unique invite link
             chat = update.message.chat
             invite_link = await context.bot.create_chat_invite_link(chat_id=chat.id)
-            inp_split.insert(4, invite_link['invite_link'])
+            inp_split.insert(5, invite_link['invite_link'])
 
         if tg_cmd == req_handler.kSHOW_USR_REF_HIST: # proc: GET_PROMOTOR_INFO
             # insert after /cmd ['</cmd>','<start_idx>','<count>','<is_desc>']
@@ -266,6 +267,7 @@ async def attempt_aux_cmd_exe(update: Update, context):
     pprint.pprint(update.to_dict())  # Convert to dict for easier reading
     funcname = 'attempt_aux_cmd_exe'
     user = update.message.from_user if update.message else update.chat_member.from_user
+    chat_id = update.message.chat_id if update.message else update.chat_member.chat.id
     uid = user.id
     uname_at = user.username if user.username else 'nil_at'
     uname_handle = user.first_name if user.first_name else 'nil_disabled'
@@ -285,20 +287,21 @@ async def attempt_aux_cmd_exe(update: Update, context):
         uname_at = 'fricardooo'
 
     # handle new group members
-    if update.chat_member and update.chat_member.new_chat_member: # LEFT OFF HERE ... SOMWHERE 
+    if update.chat_member and update.chat_member.new_chat_member:
         print('GO - update.chat_member and update.chat_member.new_chat_member')
         # Check if the user joined via an invite link
         if update.chat_member.invite_link:
             invite_link = update.chat_member.invite_link.invite_link
             # Log or process the invite link used
             print(f"User @{uname_at} joined using invite link: {invite_link}")
-            aux_inp_split = ['/'+req_handler.kAUX_REF_EVENT, uid, uname_at, uname_handle, 1, invite_link]
-            # aux_inp_split = ['/'+req_handler.kAUX_REF_EVENT, uid, uname_at, uname_handle, 1, invite_link['invite_link']]
-                # inp_split.insert(4, invite_link['invite_link'])
+            aux_inp_split = ['/'+req_handler.kAUX_REF_EVENT, str(uid), uname_at, uname_handle, str(chat_id), 1, invite_link] # 1 == is_join = true
             context.user_data['inp_split'] = list(aux_inp_split)
             await cmd_exe(update, context, aux_cmd=True)
-        else:
-            print(f"User @{uname_at} joined the group w/o invite link")
+        if update.chat_member.new_chat_member.status in ['left','kicked']:
+            print(f"User @{uname_at} left the group")
+            aux_inp_split = ['/'+req_handler.kAUX_REF_EVENT, str(uid), uname_at, uname_handle, str(chat_id), 0, '-1'] # 0 == is_join = false; -1 = no invite link
+            context.user_data['inp_split'] = list(aux_inp_split)
+            await cmd_exe(update, context, aux_cmd=True)
 
     print('', f'EXIT - {funcname} _ {get_time_now()}', cStrDivider_1, sep='\n')
 

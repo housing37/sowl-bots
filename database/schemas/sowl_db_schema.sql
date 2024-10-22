@@ -33,7 +33,7 @@ CREATE TABLE `log_tg_user_at_changes` (
   `dt_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dt_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dt_deleted` timestamp NULL DEFAULT NULL,
-  `fk_user_id` varchar(40) NOT NULL,
+  `fk_user_id` int(11) NOT NULL,
   `tg_user_id_const` varchar(40) NOT NULL,
   `tg_user_at_prev` varchar(40) NOT NULL,
   `tg_user_at_new` varchar(40) NOT NULL,
@@ -41,28 +41,32 @@ CREATE TABLE `log_tg_user_at_changes` (
   UNIQUE KEY `ID` (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-drop table if exists user_promotors;
-CREATE TABLE `user_promotors` (
+drop table if exists promotors;
+CREATE TABLE `promotors` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `dt_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dt_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dt_deleted` timestamp NULL DEFAULT NULL,
-  `fk_user_id` varchar(40) NOT NULL,
+  `fk_user_id` int(11) NOT NULL,
+  `referral_points` INT(10) default 0, -- ex: referrals.is_active = True -> pts++, else pts--
+  `tg_chat_id` varchar(40) NOT NULL, -- ex: '-1002003863532'
   `tg_user_group_url` varchar(1024) default 'nil_url', -- ex: 't.me/something'
-  `referral_points` INT(10) default 0, -- ex: user_referrals.is_active = True -> pts++, else pts--
 
   UNIQUE KEY `ID` (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-drop table if exists user_referrals;
-CREATE TABLE `user_referrals` (
+drop table if exists referrals;
+CREATE TABLE `referrals` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `dt_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dt_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dt_deleted` timestamp NULL DEFAULT NULL,
-  `fk_user_id` varchar(40) NOT NULL,
-  `tg_user_group_url` varchar(1024) default 'nil_url', -- ex: 't.me/something'
+  `fk_user_id` int(11) NOT NULL,
+  `fk_user_prom_id` int(11) NOT NULL,
   `is_active` BOOLEAN DEFAULT FALSE, -- TRUE = user joined group, FALSE = user left group
+  -- `is_active` int(11) DEFAULT 0, -- TRUE = user joined group, FALSE = user left group
+  `tg_chat_id` varchar(40) NOT NULL, -- ex: '-1002003863532'
+  `tg_user_group_url` varchar(1024) default 'nil_url', -- ex: 't.me/something'
 
   UNIQUE KEY `ID` (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -40,11 +40,11 @@ VERBOSE_LOG = False
 #-----------------------------------------------------#
 # '/gen_ref_link'
 kREG_USER = "gen_ref_link"
-LST_CMD_REG_USER = ['<tg_user_group_url>']
+LST_CMD_REG_USER = ['<chat_id>','<tg_user_group_url>']
 STR_ERR_REG_USER = f'Please tweet "@BearSharesX #Trinity register" 👍️️️️️️\n Then use that link to register with cmd:\n /{kREG_USER} {" ".join(LST_CMD_REG_USER)}'
 LST_KEYS_REG_USER_RESP = env.LST_KEYS_PLACEHOLDER
 DB_PROC_ADD_NEW_USER = 'ADD_TG_SOWL_PROMOTOR'
-LST_KEYS_REG_USER = ['user_id','user_at','user_handle','tg_user_group_url'] # '<tg_user_group_url>'
+LST_KEYS_REG_USER = ['user_id','user_at','user_handle','chat_id','tg_user_group_url']
 
 # '/show_my_referrals'
 kSHOW_USR_REF_HIST = "show_my_referrals"
@@ -60,15 +60,15 @@ LST_CMD_SHOW_LEADERS = ['<start_idx>','<count>','<is_desc>']
 STR_ERR_SHOW_LEADERS = f'''please use cmd format :\n /{kSHOW_LEADERS} {" ".join(LST_CMD_SHOW_LEADERS)}'''
 LST_KEYS_SHOW_LEADERS_RESP = env.LST_KEYS_PLACEHOLDER
 DB_PROC_GET_LEADERS = 'GET_LEADER_BOARD' # get where 'is_approved' = False
-LST_KEYS_SHOW_LEADERS = []
+LST_KEYS_SHOW_LEADERS = ['start_idx','count','is_desc']
 
 # '/aux_referral_event'
 kAUX_REF_EVENT = "aux_referral_event"
-LST_CMD_REF_EVENT = ['<is_join>', '<tg_user_group_url>']
+LST_CMD_REF_EVENT = ['<chat_id>','<is_join>', '<tg_user_group_url>']
 STR_ERR_REF_EVENT = f'''please use cmd format :\n /{kAUX_REF_EVENT} {" ".join(LST_CMD_REF_EVENT)}'''
 LST_KEYS_REF_EVENT_RESP = env.LST_KEYS_PLACEHOLDER
 DB_PROC_REF_EVENT = 'EXE_REFERRAL_EVENT'
-LST_KEYS_REF_EVENT = ['user_id','user_at','user_handle','is_join','tg_user_group_url']
+LST_KEYS_REF_EVENT = ['user_id','user_at','user_handle','chat_id','is_join','tg_user_group_url']
 
 #-----------------------------------------------------#
 DICT_CMD_EXE = {
@@ -152,6 +152,11 @@ def parse_request(request, req_handler_key, tg_cmd=None): # (1)
             #         keyVals['removed'] = '1'
             #     else:
             #         keyVals['removed'] = '0'
+            # if tg_cmd == kAUX_REF_EVENT:
+            #     if keyVals['is_join'] == 1:
+            #         keyVals['is_join'] = '1'
+            #     else:
+            #         keyVals['is_join'] = '0'
             pass
         else:
             bErr, jsonResp = prepJsonResponseValidParams(keyVals, False, tprint=VERBOSE_LOG, errMsg='command not found') # False = force fail
@@ -210,6 +215,7 @@ def execute_db_calls(keyVals, req_handler_key, tg_cmd=None): # (2)
             # if 'user_id' in keyVals: del keyVals['user_id']
             stored_proc = DICT_CMD_EXE[tg_cmd][3] # [tg_cmd][3] = 'stored-proc-name'
             dbProcResult = exe_stored_proc(-1, stored_proc, keyVals)
+            if len(dbProcResult) == 0: dbProcResult = [{'status':'failed','info':'db return 0 rows'}]
             if dbProcResult[0]['status'] == 'failed': errMsg = dbProcResult[0]['info']
             else: errMsg = None
             bErr, jsonResp = prepJsonResponseDbProcErr(dbProcResult, tprint=VERBOSE_LOG, errMsg=errMsg) # errMsg != None: force fail from db

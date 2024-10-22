@@ -254,6 +254,7 @@ def exe_stored_proc(iUserID=-1, strProc='', dictKeyVals={}):
     strOutParam = None
     args_print = ', '.join(list(dictKeyVals.values()))
     print(f' exe proc: {strProc}({args_print})')
+    # print(f' exe proc: {strProc}({argsTup})')
     return exeStoredProcedure(argsTup, strProc, strOutParam)
 
 def sel_2_tbl_query(d_col_val_where_1={},
