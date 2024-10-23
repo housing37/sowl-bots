@@ -26,10 +26,6 @@ last_online_time = time.time()  # Initialize with current time
 DEBUG_LVL = 3
 LST_TG_CMDS = list(req_handler.DICT_CMD_EXE.keys())
 WHITELIST_CHAT_IDS = [
-    '-1002041092613', # $BearShares
-    '-1002049491115', # $BearShares - testing
-    # '-4139183080', # ?
-    '-1001941928043', # TeddyShares - testing
     '-1002375576767', # tg group: test_sowl_test_bot
     '-1002275201622', # tg group: test_sowl_refer_bot
     '-1002003863532', # tg group: $SOWL🦉 ZONE
@@ -160,9 +156,9 @@ async def cmd_handler(update: Update, context):
         print(f'No admin found in tg_cmd: {tg_cmd}')
         if tg_cmd == req_handler.kREG_USER: # proc: ADD_TG_SOWL_PROMOTOR
             print(f'Detected cmd: {req_handler.kREG_USER}')
-            # insert after /cmd ['</cmd>','user_id','user_at','user_handle','chat_id','<tg_user_group_url>']
+            # insert after /cmd ['</cmd>','tg_user_id','user_at','user_handle','chat_id','<tg_user_group_url>']
             inp_split.insert(1, str(uid)) 
-            inp_split.insert(2, uname_at) # left off here ....
+            inp_split.insert(2, uname_at)
             inp_split.insert(3, uname_handle)
             inp_split.insert(4, str(_chat_id))
 
@@ -172,15 +168,12 @@ async def cmd_handler(update: Update, context):
             inp_split.insert(5, invite_link['invite_link'])
 
         if tg_cmd == req_handler.kSHOW_USR_REF_HIST: # proc: GET_PROMOTOR_INFO
-            # insert after /cmd ['</cmd>','<start_idx>','<count>','<is_desc>']
+            # insert after /cmd ['</cmd>','tg_user_id','<start_idx>','<count>','<is_desc>']
             inp_split.insert(1, uid) 
-            # inp_split.insert(2, uname_at)
-            # inp_split.insert(3, uname_handle)
-            # pass # no params for 'gen_ref_link'
 
         if tg_cmd == req_handler.kSHOW_LEADERS: # proc: GET_LEADER_BOARD
-            # inp_split.insert(3, uname_handle)
-            pass # no params for 'gen_ref_link'
+            # insert after /cmd ['</cmd>','<start_idx>','<count>','<is_desc>']
+            pass # no additional params for 'show_leaders'
 
     # NOTE: all admin db procs require 'tg_admin_id' & 'tg_user_at' (ie. uid & <tg_user_at>)    
     else: # if 'admin' in tg_cmd
