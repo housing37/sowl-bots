@@ -262,7 +262,8 @@ BEGIN
                 WHERE id = @v_usr_prom_id;
 
             -- return
-            SELECT u.id as u_id, u.tg_user_id, u.tg_user_at, u.tg_user_handle, 
+            SELECT u.id as u_id, u.tg_user_id as tg_user_id_ref, u.tg_user_at as tg_user_at_ref, u.tg_user_handle, 
+                    up.id as up_id, up.tg_user_id as tg_user_id_prom, up.tg_user_at as tg_user_at_prom,
                     r.id as r_id, r.fk_user_id as fk_user_id_ref, r.fk_user_prom_id as fk_user_prom_id_ref, r.tg_user_group_url as tg_user_group_url_ref, r.is_active as new_is_active,
                     p.id as p_id, p.fk_user_id as fk_user_id_prom, p.tg_user_group_url as tg_user_group_url_prom, p.referral_points as new_total_pts,
                     'success' as `status`,
@@ -285,6 +286,8 @@ BEGIN
                     ON u.id = r.fk_user_id
                 INNER JOIN promotors p
                     ON p.tg_user_group_url = r.tg_user_group_url
+                INNER JOIN users up
+                    on up.id = p.fk_user_id
                 WHERE r.id = @v_ref_id;
         END IF;
     END IF;

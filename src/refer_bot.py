@@ -282,6 +282,13 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False, _tpri
                 pr_pts = str(d['new_total_pts'])
                 str_r += f' {pr_at} -> referral pts: {pr_pts}\n'
             await update.message.reply_text(f"Leader Board ...\n{str_r}")
+        elif tg_cmd == req_handler.kAUX_REF_EVENT:
+            pr_at = '@'+str(d_resp['tg_user_at_prom'])
+            rf_at = '@'+str(d_resp['tg_user_at_ref'])
+            str_live = "joined the group" if d_resp['new_is_active'] else "left the group"
+            tot_pts = d_resp['new_total_pts']
+            # await update.message.reply_text(f"Referral points update ...\n referral {rf_at} {str_live}\n promotor {pr_at} total pts: {tot_pts}")
+            await context.bot.send_message(chat_id=update.chat_member.chat.id, text=f"Referral points update ...\n referral {rf_at} {str_live}\n promotor {pr_at} total pts: {tot_pts}")
         else:
             str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
             if update.message:
