@@ -169,7 +169,8 @@ async def cmd_handler(update: Update, context):
             # insert after /cmd ['</cmd>','tg_user_id','user_at','user_handle','chat_id','<tg_user_group_url>']
             inp_split.insert(1, str(uid)) 
             inp_split.insert(2, uname_at)
-            inp_split.insert(3, uname_handle)
+            # inp_split.insert(3, uname_handle)
+            inp_split.insert(3, "handle_disabled_ref")
             inp_split.insert(4, str(_chat_id))
 
             # generate random unique invite link
@@ -282,9 +283,10 @@ async def attempt_aux_cmd_exe(update: Update, context, _tprint=False):
     chat_id = update.message.chat_id if update.message else update.chat_member.chat.id
     uid = user.id
     uname_at = user.username if user.username else 'nil_at'
-    uname_handle = user.first_name if user.first_name else 'nil_disabled'
-    if user.last_name:
-        uname_handle = uname_handle + ' ' + user.last_name
+    # uname_handle = user.first_name if user.first_name else 'nil_disabled'
+    # if user.last_name:
+    #     uname_handle = uname_handle + ' ' + user.last_name
+    uname_handle = 'handle_disabled_ref'
 
     # validate user has @username setup
     if uname_at == None:
