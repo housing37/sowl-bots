@@ -18,7 +18,8 @@ BEGIN
     SELECT COUNT(*) FROM referrals WHERE tg_user_group_url = @v_ref_link AND is_active = FALSE INTO @v_usr_lost_cnt;
     SELECT COUNT(*) FROM referrals WHERE tg_user_group_url = @v_ref_link INTO @v_usr_ref_cnt;
     IF @v_usr_ref_cnt > 0 THEN
-	    SELECT u.id as u_id, 
+	    SELECT u.id as u_id, u.tg_user_at as tg_user_at_prom,
+                ur.id as ur_id, ur.tg_user_at as tg_user_at_ref,
 	    		r.dt_created as dt_created_ref, r.dt_updated as dt_updated_ref, 
 	    		r.dt_deleted as dt_deleted_ref, r.fk_user_id as fk_user_id_ref, 
 	    		r.tg_user_group_url as tg_user_group_url_ref, r.is_active as is_active_ref, 
@@ -41,13 +42,15 @@ BEGIN
 	            ON u.id = p.fk_user_id
             INNER JOIN referrals r
                 ON r.tg_user_group_url = p.tg_user_group_url
+            INNER JOIN users ur
+                on r.fk_user_id = ur.id
 	        WHERE u.id = @v_user_id
 	        ORDER BY 
 	            r.is_active ASC,
-	            u.dt_created * (CASE WHEN p_desc THEN -1 ELSE 1 END)
+	            ur.dt_created * (CASE WHEN p_desc THEN -1 ELSE 1 END)
 	        LIMIT p_start_idx, p_count;
     ELSE
-	    SELECT u.id as u_id, 
+	    SELECT u.id as u_id, u.tg_user_at as tg_user_at_prom,
 	    		p.dt_created as dt_created_prom, p.dt_updated as dt_updated_prom, 
 	    		p.dt_deleted as dt_deleted_prom, p.fk_user_id as fk_user_id_prom, 
 	    		p.tg_user_group_url as tg_user_group_url_prom, p.referral_points as referral_points_prom,
