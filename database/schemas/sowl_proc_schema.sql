@@ -327,6 +327,10 @@ BEGIN
     ELSE
         -- if join, validate: user_id|chat_id combo indeed exists in referrals table
         --  NOTE: confirmed 'p_tg_user_group_url' exists in promotors table above
+        --  NOTE: if @v_valid_usr_ref = TRUE, then insert to referrals table does not occur
+        --   HENCE, only 1 tg_user_group_url allowed, per user_id|chat_id combo in referrals, even if leave|join occurs
+        --    ie. once a user joins a group w/ a ref_link, he cannot rejoin the same group with any other ref_link
+        --      (a manual delete of this user_id|chat_id combo from referrals table, would be needed)
         IF p_is_join AND NOT @v_valid_usr_ref THEN
             -- add to referrals table 
             --  w/ promotors id bound to chat_id|invite_link combo in promotors table
@@ -382,7 +386,10 @@ BEGIN
             UPDATE referrals SET dt_updated = NOW(), is_active = p_is_join WHERE id = @v_ref_id;
 
             -- calc & set promotor's points (increment|decrement)
-            SELECT referral_points FROM promotors WHERE tg_chat_id = p_tg_chat_id INTO @v_OG_pts_prom;
+            SELECT referral_points FROM promotors 
+                WHERE tg_chat_id = p_tg_chat_id
+                    AND tg_user_group_url = @v_tg_user_group_url_ref
+                INTO @v_OG_pts_prom;
             SELECT id FROM promotors 
                 WHERE tg_chat_id = p_tg_chat_id 
                     AND tg_user_group_url = @v_tg_user_group_url_ref
@@ -619,8 +626,6 @@ drop FUNCTION if exists valid_tg_user_referral; -- setup
 CREATE FUNCTION `valid_tg_user_referral`(
 		p_user_id VARCHAR(40),
         p_tg_chat_id VARCHAR(40)) RETURNS BOOLEAN
-        -- p_tg_chat_id VARCHAR(40),
-        -- p_tg_user_group_url VARCHAR(1024)) RETURNS BOOLEAN
     READS SQL DATA
     DETERMINISTIC
 BEGIN
@@ -628,7 +633,29 @@ BEGIN
 	SELECT COUNT(*) FROM referrals 
         WHERE fk_user_id = p_user_id 
             AND tg_chat_id = p_tg_chat_id
-            -- AND tg_user_group_url = p_tg_user_group_url
+        INTO @v_cnt;
+	IF @v_cnt > 0 THEN -- yes exists
+		RETURN TRUE; 
+	ELSE -- does not exist
+		RETURN FALSE;
+	END IF;
+END 
+$$ DELIMITER ;
+
+DELIMITER $$
+drop FUNCTION if exists valid_tg_user_referral_url; -- setup
+CREATE FUNCTION `valid_tg_user_referral_url`(
+		p_user_id VARCHAR(40),
+        p_tg_chat_id VARCHAR(40),
+        p_tg_user_group_url VARCHAR(1024)) RETURNS BOOLEAN
+    READS SQL DATA
+    DETERMINISTIC
+BEGIN
+	-- check if user_id exits yet
+	SELECT COUNT(*) FROM referrals 
+        WHERE fk_user_id = p_user_id 
+            AND tg_chat_id = p_tg_chat_id
+            AND tg_user_group_url = p_tg_user_group_url
         INTO @v_cnt;
 	IF @v_cnt > 0 THEN -- yes exists
 		RETURN TRUE; 
