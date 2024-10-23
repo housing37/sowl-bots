@@ -38,7 +38,10 @@ WHITELIST_CHAT_IDS = [
 BLACKLIST_TEXT = [
     'smart vault', 'smart-vault', 'smart_vault', # @JstKidn
     ]
-
+REF_MSG_CNT_REQ = 5
+USER_MSG_CNT = {
+    # '<tg_user_id>':(-1, Update, CallbackContext)
+}
 # input select
 USE_PROD_TG = False
 TOKEN = 'nil_tg_token'
@@ -210,8 +213,8 @@ async def btn_option_selects(update: Update, context):
     context.user_data['inp_split'] = list(inp_split)
     await cmd_exe(update, context)
 
-async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False):
-    pprint.pprint(update.to_dict())  # Convert to dict for easier reading
+async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False, _tprint=False):
+    if _tprint: pprint.pprint(update.to_dict())  # Convert to dict for easier reading
     funcname = 'cmd_exe'
     print(cStrDivider_1, f'ENTER - {funcname} _ {get_time_now()}', sep='\n')
     
@@ -272,8 +275,8 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False):
 #     if success: return bool(dbProcResult[0]['is_used'])
 #     else: True # db proc failes, return True (act like shill already used)
 
-async def attempt_aux_cmd_exe(update: Update, context):
-    pprint.pprint(update.to_dict())  # Convert to dict for easier reading
+async def attempt_aux_cmd_exe(update: Update, context, _tprint=False):
+    if _tprint: pprint.pprint(update.to_dict())  # Convert to dict for easier reading
     funcname = 'attempt_aux_cmd_exe'
     user = update.message.from_user if update.message else update.chat_member.from_user
     chat_id = update.message.chat_id if update.message else update.chat_member.chat.id
@@ -315,8 +318,10 @@ async def attempt_aux_cmd_exe(update: Update, context):
     print('', f'EXIT - {funcname} _ {get_time_now()}', cStrDivider_1, sep='\n')
 
 async def log_activity(update: Update, context):
+    global USER_MSG_CNT, REF_MSG_CNT_REQ
     print('checking requirements for attempt_aux_cmd_exe')
     if update.message != None:
+        print('ENTER - if update.message != None:')
         chat_type = str(update.message.chat.type)
         chat_id = update.message.chat_id
         user = update.message.from_user
@@ -326,10 +331,39 @@ async def log_activity(update: Update, context):
         inp = update.message.text
         lst_user_data = [uid, usr_at_name, usr_handle]
         lst_chat_data = [chat_id, chat_type]
-        print(f'{get_time_now()} _ action: {lst_user_data}, {lst_chat_data}')
-        await attempt_aux_cmd_exe(update, context)
+        # print(f'{get_time_now()} _ action: {lst_user_data}, {lst_chat_data}')
+        # await attempt_aux_cmd_exe(update, context, True)
+
+        # check if user msg count is less then req for ref points
+        #  if so, incrememnt msg count and check if now meets req
+        #   if so, then exe attempt_aux_cmd_exe w/ OG saved 'Update' & 'CallbackContext'
+        if uid in USER_MSG_CNT.keys() and USER_MSG_CNT[uid][0] < REF_MSG_CNT_REQ:
+            USER_MSG_CNT[uid] = (USER_MSG_CNT[uid][0] + 1, USER_MSG_CNT[uid][1], USER_MSG_CNT[uid][2])
+            if USER_MSG_CNT[uid][0] >= REF_MSG_CNT_REQ:
+                await attempt_aux_cmd_exe(USER_MSG_CNT[uid][1], USER_MSG_CNT[uid][2], True)
+        elif uid in USER_MSG_CNT.keys():
+            print(f'uid: {uid} msg cnt > REF_MSG_CNT_REQ ... ref pts should be logged already')
+        else:
+            print(f'uid: {uid} not found in USER_MSG_CNT ... doing nothing')
+        print(f'{get_time_now()} _ action: {lst_user_data}, {lst_chat_data} _ msgCnt: {USER_MSG_CNT[uid][0] if uid in USER_MSG_CNT else -1}')
+
     elif update.chat_member != None:
-        await attempt_aux_cmd_exe(update, context)
+        # await attempt_aux_cmd_exe(update, context, True)
+        print('ENTER - elif update.chat_member != None:')
+        uid = str(update.chat_member.from_user.id)
+        # if leaving, process leaving to DB
+        if update.chat_member.new_chat_member.status in ['left','kicked']:
+            await attempt_aux_cmd_exe(update, context, True)
+        else: # else joining, process joining via msg cnt tracking
+            # print(f'USER_MSG_CNT.keys(): {USER_MSG_CNT.keys()}')
+            # print(f'uid: {uid}')
+            # print(f'Type of uid: {type(uid)}')
+            
+            # check if user has msg cnt entry or not (ie. re-joining or joining)
+            #  and store 'update' data for use in msg cnt tracking
+            if uid not in USER_MSG_CNT.keys(): print(f'uid: {uid} joined... starting msg cnt = 0')
+            else: print(f'uid: {uid} re-joined... re-starting msg cnt = 0')
+            USER_MSG_CNT[uid] = (0, update, context)
     else:
         print(f'{get_time_now()} _ action : found .message & .chat_member == None; returning')
 
