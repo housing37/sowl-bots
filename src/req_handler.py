@@ -31,7 +31,7 @@ VERBOSE_LOG = False
 # start - show help info
 # help - show help info
 # gen_ref_link - no_params
-# show_my_referrals - no_params
+# show_my_referrals - <start_idx> <count> <is_desc>
 # show_leaders - <start_idx> <count> <is_desc>
 # <aux_referral_event> - no_params
 

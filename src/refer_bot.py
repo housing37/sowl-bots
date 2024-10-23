@@ -24,7 +24,12 @@ last_online_time = time.time()  # Initialize with current time
 #------------------------------------------------------------#
 # constants
 DEBUG_LVL = 3
+ALLOW_DMS = True
 LST_TG_CMDS = list(req_handler.DICT_CMD_EXE.keys())
+DEV_CHAT_ID = '-1002375576767' # tg group: test_sowl_test_bot
+PROD_CHAT_ID_0 = '-1002275201622' # tg group: test_sowl_refer_bot
+PROD_CHAT_ID_1 = '-1002003863532' # tg group: $SOWL🦉 ZONE
+PROD_CHAT_ID = PROD_CHAT_ID_0
 WHITELIST_CHAT_IDS = [
     '-1002375576767', # tg group: test_sowl_test_bot
     '-1002275201622', # tg group: test_sowl_refer_bot
@@ -77,7 +82,7 @@ def is_valid_chat_id(_chat_id, _group_name, _uname, _handle):
     if _group_name: print("Group name:", _group_name)
     else: print("*NOTE* This message was not sent from a group.")
     if str(_chat_id) not in WHITELIST_CHAT_IDS: # check whitelisted groups
-        print("*** WARNING ***: non-whitelist TG group trying to use the bot; sending deny message...")
+        print("*** WARNING ***: non-whitelist TG group trying to use the bot; generating deny message...")
         str_deny = f"@{_uname} (aka. {_handle}): ... not authorized"
         print(str_deny)
         return False, str_deny
@@ -133,12 +138,14 @@ async def cmd_handler(update: Update, context):
     #   NOTE: at this point, inp_split[0] is indeed a valid command
     print(f'handling cmd: '+inp_split[0])
     print(f"chat_type: {chat_type}")
+    print(f"_chat_id: {_chat_id}")
     tg_cmd = inp_split[0][1::] # parses out the '/'
-
+    
     # fail: if not in WHITELIST_CHAT_IDS and not a DM
     valid_chat, str_deny = is_valid_chat_id(str(_chat_id), group_name, uname_at, uname_handle)
     # print(valid_cmd, valid_chat, chat_type, str_deny, sep='\n')
-    if not valid_chat and not is_dm:
+    # if not valid_chat and not is_dm:
+    if (is_dm and not ALLOW_DMS) or (not valid_chat and not is_dm):
         await context.bot.send_message(chat_id=update.message.chat_id, text=str_deny+' '+inp_split[0])    
         print('', f'EXIT - {funcname} _ {get_time_now()}', cStrDivider_1, sep='\n')
         return
@@ -163,8 +170,17 @@ async def cmd_handler(update: Update, context):
             inp_split.insert(4, str(_chat_id))
 
             # generate random unique invite link
-            chat = update.message.chat
-            invite_link = await context.bot.create_chat_invite_link(chat_id=chat.id)
+            link_chat_id = _chat_id
+            print(f'link_chat_id: {link_chat_id}')
+            print(f'USE_PROD_TG: {USE_PROD_TG}')
+            print(f'PROD_CHAT_ID: {PROD_CHAT_ID}')
+            print(f'DEV_CHAT_ID: {DEV_CHAT_ID}')
+            print(f'is_dm: {is_dm}')
+            if is_dm: # set proper chat_id for invite link and db entry
+                link_chat_id = PROD_CHAT_ID if USE_PROD_TG else DEV_CHAT_ID
+                inp_split[4] = link_chat_id
+            print(f'link_chat_id: {link_chat_id}')
+            invite_link = await context.bot.create_chat_invite_link(chat_id=link_chat_id)
             inp_split.insert(5, invite_link['invite_link'])
 
         if tg_cmd == req_handler.kSHOW_USR_REF_HIST: # proc: GET_PROMOTOR_INFO
@@ -441,15 +457,25 @@ if __name__ == "__main__":
         inp = input('\nSelect TG bot to use:\n  0 = @sowl_refer_bot \n  1 = @sowl_test_bot \n  > ')
         USE_PROD_TG = True if inp == '0' else False
         print(f'  input = {inp} _ USE_PROD_TG = {USE_PROD_TG}')
+        if USE_PROD_TG:
+            inp = input('\n Select PROD_CHAT_ID to use:\n   0 = TG group: test_sowl_refer_bot \n   1 = TG group: $SOWL🦉 ZONE \n   > ')
+            PROD_CHAT_ID = PROD_CHAT_ID_0 if inp == '0' or inp == '' else PROD_CHAT_ID_1
+            print(f'   input = {inp} _ PROD_CHAT_ID = {PROD_CHAT_ID}')
 
         inp = input('\nUse alt tg_user_id for testing (USE_ALT_ACCT)? [y/n]:\n  > ')
         USE_ALT_ACCT = True if inp.lower() == 'y' or inp.lower() == '1' else False
         print(f'  input = {inp} _ USE_ALT_ACCT = {USE_ALT_ACCT}')
 
+        inp = input('\nAllow DMs to this bot? (ALLOW_DMS)? [y/n]:\n  > ')
+        ALLOW_DMS = True if inp.lower() == 'y' or inp.lower() == '1' else False
+        print(f'  input = {inp} _ ALLOW_DMS = {ALLOW_DMS}')
+
         set_tg_token()  
         print(f'\nTelegram TOKEN: {TOKEN}')
         print(f'USE_PROD_TG: {USE_PROD_TG}')
+        print(f'PROD_CHAT_ID: {PROD_CHAT_ID}')
         print(f'USE_ALT_ACCT: {USE_ALT_ACCT}')
+        print(f'ALLOW_DMS: {ALLOW_DMS}')
         main()
     except Exception as e:
         print_except(e, debugLvl=DEBUG_LVL)
