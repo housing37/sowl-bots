@@ -85,7 +85,8 @@ CREATE PROCEDURE `GET_LEADER_BOARD`(
     IN p_desc BOOLEAN
 	)
 BEGIN
-    SELECT u.*, p.*,
+    SELECT u.id as u_id, u.dt_created as dt_created_usr, u.dt_updated as dt_updated_usr, u.tg_user_id, u.tg_user_at, u.tg_user_handle, 
+            p.id as p_id, p.dt_created as dt_created_prom, p.dt_updated as dt_updated_prom, p.fk_user_id as fk_user_id_prom, p.tg_chat_id as tg_chat_id_prom, p.tg_user_group_url as tg_user_group_url_prom, p.referral_points as new_total_pts,
             'success' as `status`,
             'retreived leader board' as info,
             p_start_idx as start_idx_inp,
