@@ -152,11 +152,6 @@ def parse_request(request, req_handler_key, tg_cmd=None): # (1)
             #         keyVals['removed'] = '1'
             #     else:
             #         keyVals['removed'] = '0'
-            # if tg_cmd == kAUX_REF_EVENT:
-            #     if keyVals['is_join'] == 1:
-            #         keyVals['is_join'] = '1'
-            #     else:
-            #         keyVals['is_join'] = '0'
             pass
         else:
             bErr, jsonResp = prepJsonResponseValidParams(keyVals, False, tprint=VERBOSE_LOG, errMsg='command not found') # False = force fail
@@ -196,8 +191,6 @@ def execute_db_proc(keyVals, stored_proc):
     bErr, jsonResp = prepJsonResponseDbProcErr(dbProcResult, tprint=VERBOSE_LOG)
     if bErr: return False, 'db error occurred', dbProcResult
     return True, jsonResp, dbProcResult
-
-    # LEFT OFF HERE ...
 
 # append req_handler_key, parse keyVals params, invoke database function
 def execute_db_calls(keyVals, req_handler_key, tg_cmd=None): # (2)

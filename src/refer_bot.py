@@ -147,7 +147,9 @@ async def cmd_handler(update: Update, context):
     # fail: if not in WHITELIST_CHAT_IDS and not a DM
     valid_chat, str_deny = is_valid_chat_id(str(_chat_id), group_name, uname_at, uname_handle)
     # print(valid_cmd, valid_chat, chat_type, str_deny, sep='\n')
-    # if not valid_chat and not is_dm:
+
+    # if DM and DMs not allow ... OR ... not a DM and not a valid chat
+    #   then send deny message
     if (is_dm and not ALLOW_DMS) or (not valid_chat and not is_dm):
         await context.bot.send_message(chat_id=update.message.chat_id, text=str_deny+' '+inp_split[0])    
         print('', f'EXIT - {funcname} _ {get_time_now()}', cStrDivider_1, sep='\n')
@@ -291,8 +293,6 @@ async def attempt_aux_cmd_exe(update: Update, context, _tprint=False):
     # validate user has @username setup
     if uname_at == None:
         uname_at = str(uid)
-        # print(f'{get_time_now()} __ action : found uname_at == None; skip attempt_aux_cmd_exe')
-        # return
     
     if USE_ALT_ACCT: 
         # uid = '1058890141'
@@ -333,8 +333,6 @@ async def log_activity(update: Update, context):
         inp = update.message.text
         lst_user_data = [uid, usr_at_name, usr_handle]
         lst_chat_data = [chat_id, chat_type]
-        # print(f'{get_time_now()} _ action: {lst_user_data}, {lst_chat_data}')
-        # await attempt_aux_cmd_exe(update, context, True)
 
         # check if user msg count is less then req for ref points
         #  if so, incrememnt msg count and check if now meets req
@@ -356,11 +354,7 @@ async def log_activity(update: Update, context):
         # if leaving, process leaving to DB
         if update.chat_member.new_chat_member.status in ['left','kicked']:
             await attempt_aux_cmd_exe(update, context, True)
-        else: # else joining, process joining via msg cnt tracking
-            # print(f'USER_MSG_CNT.keys(): {USER_MSG_CNT.keys()}')
-            # print(f'uid: {uid}')
-            # print(f'Type of uid: {type(uid)}')
-            
+        else: # else joining, process joining via msg cnt tracking            
             # check if user has msg cnt entry or not (ie. re-joining or joining)
             #  and store 'update' data for use in msg cnt tracking
             if uid not in USER_MSG_CNT.keys(): print(f'uid: {uid} joined... starting msg cnt = 0')
