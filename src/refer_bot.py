@@ -254,9 +254,20 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False, _tpri
             # d_resp['tg_user_at_inp'] = '@'+str(d_resp['tg_user_at_inp'])
             # str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() if str(k) in inc_])
             # await update.message.reply_text(f"Info for shill id: {shill_id} ...\n {str_r}")
+            
             new_ref_link = d_resp['new_tg_user_group_url']
+            pr_at = '@'+str(d_resp['tg_user_at'])
             str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
-            await update.message.reply_text(f"Registration successful!\nYour referral link: {new_ref_link} ...\n {str_r}")
+            await update.message.reply_text(f"Registration successful!\nYour referral link (for {pr_at}):\n {new_ref_link}")
+        elif tg_cmd == req_handler.kSHOW_USR_REF_HIST:
+            d_resp_arr = response_dict['PAYLOAD']['result_arr']
+            str_r = ''
+            for d in d_resp_arr:
+                pr_at = '@'+str(d['tg_user_at_prom'])
+                rf_at = '@'+str(d['tg_user_at_ref'])
+                str_live = 'live:'+ "True" if d['is_active_ref'] else "False"
+                str_r += f' {pr_at} referred {rf_at} _ {str_live}\n'
+            await update.message.reply_text(f"Your Referrals ...\n{str_r}")
         else:
             str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
             if update.message:
