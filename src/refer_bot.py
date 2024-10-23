@@ -168,7 +168,7 @@ async def cmd_handler(update: Update, context):
         print(f'No admin found in tg_cmd: {tg_cmd}')
         if tg_cmd == req_handler.kREG_USER: # proc: ADD_TG_SOWL_PROMOTOR
             print(f'Detected cmd: {req_handler.kREG_USER}')
-            # insert after /cmd ['</cmd>','tg_user_id','user_at','user_handle','chat_id','<tg_user_group_url>']
+            # input /cmd ['</cmd>','tg_user_id','user_at','user_handle','chat_id','<tg_user_group_url>']
             inp_split.insert(1, str(uid)) 
             inp_split.insert(2, uname_at)
             # inp_split.insert(3, uname_handle)
@@ -190,11 +190,18 @@ async def cmd_handler(update: Update, context):
             inp_split.insert(5, invite_link['invite_link'])
 
         if tg_cmd == req_handler.kSHOW_USR_REF_HIST: # proc: GET_PROMOTOR_INFO
-            # insert after /cmd ['</cmd>','tg_user_id','<start_idx>','<count>','<is_desc>']
-            inp_split.insert(1, uid) 
+            # input /cmd = ['</cmd>','tg_user_id','<start_idx>','<count>','<is_desc>']
+            inp_split.insert(1, uid)
+            inp_split.insert(2, 0)
+            inp_split.insert(3, 100)
+            inp_split.insert(4, 1)
 
         if tg_cmd == req_handler.kSHOW_LEADERS: # proc: GET_LEADER_BOARD
-            # insert after /cmd ['</cmd>','<start_idx>','<count>','<is_desc>']
+            # input /cmd = ['</cmd>','<start_idx>','<count>','<is_desc>']
+            inp_split.insert(1, 0)
+            inp_split.insert(2, 100)
+            inp_split.insert(3, 0)
+
             pass # no additional params for 'show_leaders'
 
     # NOTE: all admin db procs require 'tg_admin_id' & 'tg_user_at' (ie. uid & <tg_user_at>)    
