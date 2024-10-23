@@ -246,6 +246,7 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False, _tpri
             str_resp = f"err_{err_num}: {err_msg}"
             if not aux_cmd: await update.message.reply_text(str_resp)
     else:
+        d_resp_arr = response_dict['PAYLOAD']['result_arr']
         d_resp = response_dict['PAYLOAD']['result_arr'][0]
         if tg_cmd == req_handler.kREG_USER:
             # shill_id = d_resp['shill_id']
@@ -260,7 +261,6 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False, _tpri
             str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
             await update.message.reply_text(f"Registration successful!\nYour referral link (for {pr_at}):\n {new_ref_link}")
         elif tg_cmd == req_handler.kSHOW_USR_REF_HIST:
-            d_resp_arr = response_dict['PAYLOAD']['result_arr']
             str_r = ''
             for d in d_resp_arr:
                 pr_at = '@'+str(d['tg_user_at_prom'])
@@ -268,6 +268,13 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False, _tpri
                 str_live = 'live:'+ "True" if d['is_active_ref'] else "False"
                 str_r += f' {pr_at} referred {rf_at} _ {str_live}\n'
             await update.message.reply_text(f"Your Referrals ...\n{str_r}")
+        elif tg_cmd == req_handler.kSHOW_LEADERS:
+            str_r = ''
+            for d in d_resp_arr:
+                pr_at = '@'+str(d['tg_user_at'])
+                pr_pts = str(d['new_total_pts'])
+                str_r += f' {pr_at} -> referral pts: {pr_pts}\n'
+            await update.message.reply_text(f"Leader Board ...\n{str_r}")
         else:
             str_r = '\n '.join([str(k)+': '+str(d_resp[k]) for k in d_resp.keys() ])
             if update.message:
