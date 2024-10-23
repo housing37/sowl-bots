@@ -40,8 +40,8 @@ VERBOSE_LOG = False
 #-----------------------------------------------------#
 # '/gen_ref_link'
 kREG_USER = "gen_ref_link"
-LST_CMD_REG_USER = ['<chat_id>','<tg_user_group_url>']
-STR_ERR_REG_USER = f'Please tweet "@BearSharesX #Trinity register" 👍️️️️️️\n Then use that link to register with cmd:\n /{kREG_USER} {" ".join(LST_CMD_REG_USER)}'
+LST_CMD_REG_USER = []
+STR_ERR_REG_USER = f'''please use cmd format :\n /{kREG_USER} {" ".join(LST_CMD_REG_USER)}'''
 LST_KEYS_REG_USER_RESP = env.LST_KEYS_PLACEHOLDER
 DB_PROC_ADD_NEW_USER = 'ADD_TG_SOWL_PROMOTOR'
 LST_KEYS_REG_USER = ['user_id','user_at','user_handle','chat_id','tg_user_group_url']
@@ -64,7 +64,7 @@ LST_KEYS_SHOW_LEADERS = ['start_idx','count','is_desc']
 
 # '/aux_referral_event'
 kAUX_REF_EVENT = "aux_referral_event"
-LST_CMD_REF_EVENT = ['<chat_id>','<is_join>', '<tg_user_group_url>']
+LST_CMD_REF_EVENT = []
 STR_ERR_REF_EVENT = f'''please use cmd format :\n /{kAUX_REF_EVENT} {" ".join(LST_CMD_REF_EVENT)}'''
 LST_KEYS_REF_EVENT_RESP = env.LST_KEYS_PLACEHOLDER
 DB_PROC_REF_EVENT = 'EXE_REFERRAL_EVENT'
