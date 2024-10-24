@@ -7,14 +7,15 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS GET_PROMOTOR_INFO;
 CREATE PROCEDURE `GET_PROMOTOR_INFO`(
     IN p_tg_user_id VARCHAR(40), -- '581475171'
+    IN p_tg_chat_id VARCHAR(40), -- '-1002003863532'
     IN p_start_idx INT(10),
     IN p_count INT(10),
     IN p_desc BOOLEAN
 	)
 BEGIN
     SELECT id FROM users WHERE tg_user_id = p_tg_user_id INTO @v_user_id;
-    SELECT referral_points FROM promotors WHERE fk_user_id = @v_user_id INTO @v_pts_earned;
-    SELECT tg_user_group_url FROM promotors WHERE fk_user_id = @v_user_id INTO @v_ref_link;
+    SELECT referral_points FROM promotors WHERE fk_user_id = @v_user_id AND tg_chat_id = p_tg_chat_id INTO @v_pts_earned;
+    SELECT tg_user_group_url FROM promotors WHERE fk_user_id = @v_user_id AND tg_chat_id = p_tg_chat_id INTO @v_ref_link;
     SELECT COUNT(*) FROM referrals WHERE tg_user_group_url = @v_ref_link AND is_active = FALSE INTO @v_usr_lost_cnt;
     SELECT COUNT(*) FROM referrals WHERE tg_user_group_url = @v_ref_link INTO @v_usr_ref_cnt;
     IF @v_usr_ref_cnt > 0 THEN

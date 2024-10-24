@@ -190,8 +190,9 @@ async def cmd_handler(update: Update, context):
             inp_split.insert(5, invite_link['invite_link'])
 
         if tg_cmd == req_handler.kSHOW_USR_REF_HIST: # proc: GET_PROMOTOR_INFO
-            # input /cmd = ['</cmd>','tg_user_id','<start_idx>','<count>','<is_desc>']
+            # input /cmd = ['</cmd>','tg_user_id','tg_chat_id','<start_idx>','<count>','<is_desc>']
             inp_split.insert(1, uid)
+            inp_split.insert(2, str(_chat_id))
             inp_split.insert(2, 0)
             inp_split.insert(3, 100)
             inp_split.insert(4, 1)
