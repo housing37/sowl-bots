@@ -1,7 +1,7 @@
 # sowl_bots
 sowl bots (OG referral bot)
 
-## Instructions:
+## Features:
     1) generate a personal referal link to this TG group (TG @username required, 1 link per @username)
     2) give that link to anyone you want to refer to this TG group
     3) someone uses your personal referal link to join this TG group
@@ -14,6 +14,25 @@ sowl bots (OG referral bot)
     /show_my_referrals
     /show_leaders
     <aux_referral_event>
+
+## Instructions:
+    1) install mysql
+        - google/chatGPT
+    2) install database
+        $ mysql -u root
+        > source ./database/schemas/sowl_db_schema.sql
+        > source ./database/schemas/sowl_proc_schema.sql
+    3) create bot and get secret key/token
+        - TG: @botfather
+    4) create/set .env file in ./_env
+        # db access
+        DB_HOST=127.0.0.1
+        DB_USERNAME=dev
+        DB_PASSWORD=password
+        DB_DATABASE=sowl
+        TG_TOKEN_SWOWL_TEST=xxxxx # @sowl_test_bot
+    5) run bot
+        $ python3.11 refer_bot.py
 
 ## Questions: @housing37
 
