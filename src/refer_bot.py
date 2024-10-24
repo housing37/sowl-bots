@@ -353,6 +353,7 @@ async def attempt_aux_cmd_exe(update: Update, context, _tprint=False):
 
 async def log_activity(update: Update, context):
     global USER_MSG_CNT, REF_MSG_CNT_REQ
+    _tprint = True
     print('checking requirements for attempt_aux_cmd_exe')
     if update.message != None:
         print('ENTER - if update.message != None:')
@@ -391,7 +392,8 @@ async def log_activity(update: Update, context):
         # if leaving, process leaving to DB
         if update.chat_member.new_chat_member.status in ['left','kicked']:
             await attempt_aux_cmd_exe(update, context, True)
-        else: # else joining, process joining via msg cnt tracking            
+        else: # else joining, process joining via msg cnt tracking
+            if _tprint: pprint.pprint(update.to_dict())  # Convert to dict for easier reading        
             # check if user has msg cnt entry or not (ie. re-joining or joining)
             #  and store 'update' data for use in msg cnt tracking
             if uid not in USER_MSG_CNT.keys(): print(f'uid: {uid} joined... starting msg cnt = 0')
