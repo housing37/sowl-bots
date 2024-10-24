@@ -52,7 +52,7 @@ LST_CMD_SHOW_HIST = ['<start_idx>','<count>','<is_desc>']
 STR_ERR_SHOW_HIST = f'''please use cmd format :\n /{kSHOW_USR_REF_HIST} {" ".join(LST_CMD_SHOW_HIST)}'''
 LST_KEYS_SHOW_HIST_RESP = env.LST_KEYS_PLACEHOLDER
 DB_PROC_GET_USR_REF_HIST = 'GET_PROMOTOR_INFO'
-LST_KEYS_SHOW_HIST = ['user_id','start_idx','count','is_desc']
+LST_KEYS_SHOW_HIST = ['user_id','tg_chat_id','start_idx','count','is_desc']
 
 # '/show_leaders'
 kSHOW_LEADERS = "show_leaders"
