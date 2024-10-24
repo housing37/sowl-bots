@@ -270,10 +270,11 @@ async def cmd_exe(update: Update, context: CallbackContext, aux_cmd=False, _tpri
         elif tg_cmd == req_handler.kSHOW_USR_REF_HIST:
             str_r = ''
             for d in d_resp_arr:
-                pr_at = '@'+str(d['tg_user_at_prom'])
-                rf_at = '@'+str(d['tg_user_at_ref'])
-                str_live = 'live:'+ "True" if d['is_active_ref'] else "False"
-                str_r += f' {pr_at} referred {rf_at} _ {str_live}\n'
+                if 'tg_user_at_ref' in d:
+                    rf_at = '@'+str(d['tg_user_at_ref'])
+                    pr_at = '@'+str(d['tg_user_at_prom'])
+                    str_live = 'live:'+ "True" if d['is_active_ref'] else "False"
+                    str_r += f' {pr_at} referred {rf_at} _ {str_live}\n'
             await update.message.reply_text(f"Your Referrals ...\n{str_r}")
         elif tg_cmd == req_handler.kSHOW_LEADERS:
             str_r = ''
