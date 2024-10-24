@@ -24,7 +24,7 @@ sowl bots (OG referral bot)
         > source ./database/schemas/sowl_proc_schema.sql
     3) create bot and get secret key/token
         - TG: @botfather
-    4) create/set .env file in ./_env
+    4) create/set .env file in ./src/_env
         # db access
         DB_HOST=127.0.0.1
         DB_USERNAME=dev
