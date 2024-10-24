@@ -193,9 +193,9 @@ async def cmd_handler(update: Update, context):
             # input /cmd = ['</cmd>','tg_user_id','tg_chat_id','<start_idx>','<count>','<is_desc>']
             inp_split.insert(1, uid)
             inp_split.insert(2, str(_chat_id))
-            inp_split.insert(2, 0)
-            inp_split.insert(3, 100)
-            inp_split.insert(4, 1)
+            inp_split.insert(3, 0)
+            inp_split.insert(4, 100)
+            inp_split.insert(5, 1)
 
         if tg_cmd == req_handler.kSHOW_LEADERS: # proc: GET_LEADER_BOARD
             # input /cmd = ['</cmd>','<start_idx>','<count>','<is_desc>']
