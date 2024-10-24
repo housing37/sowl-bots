@@ -38,7 +38,7 @@ WHITELIST_CHAT_IDS = [
 BLACKLIST_TEXT = [
     'smart vault', 'smart-vault', 'smart_vault', # @JstKidn
     ]
-REF_MSG_CNT_REQ = 5
+REF_MSG_CNT_REQ = 1
 USER_MSG_CNT = {
     # '<tg_user_id>':(-1, Update, CallbackContext)
 }
@@ -383,6 +383,11 @@ async def log_activity(update: Update, context):
         # await attempt_aux_cmd_exe(update, context, True)
         print('ENTER - elif update.chat_member != None:')
         uid = str(update.chat_member.from_user.id)
+        IGNORED_BOTS = ['7065258035']
+        if uid in IGNORED_BOTS:
+            print(f'... ignoring uid: {uid}')
+            return
+        
         # if leaving, process leaving to DB
         if update.chat_member.new_chat_member.status in ['left','kicked']:
             await attempt_aux_cmd_exe(update, context, True)
